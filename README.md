@@ -141,8 +141,4 @@ npm run build    # production build
 
 ## Why this design
 
-The hard parts in real AV curation are not the models — they're (a) **multimodal joins at scale** (PyArrow/DuckDB), (b) **partition design for vector search** (IVF-PQ-style ANN), and (c) **lineage that survives team handoffs** (DVC + manifest hashing). Those are exactly the data-engineering surfaces this project exercises.
-
-## License
-
-MIT
+The hard parts in real AV curation are not the models — they're (a) **multimodal joins at scale** (PyArrow/DuckDB), (b) **partition design for vector search** (IVF-PQ-style ANN), and (c) **lineage that survives team handoffs** (DVC + manifest hashing). Those are exactly the data-engineering surfaces.
