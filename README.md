@@ -12,7 +12,8 @@ End-to-end pipeline that ingests synchronized multi-sensor AV data (LiDAR + RGB 
 
 ## Live demo
 
-- **Frontend (Vercel):** see deployment URL after `vercel --prod`
+- **Frontend (Vercel):** https://av-curation-pipeline.vercel.app
+- **Source:** https://github.com/Reethika30/av-curation-pipeline
 - **Embedding viewer:** UMAP scatter, near-duplicate gallery, outlier explorer, DVC lineage timeline
 
 ## Architecture
