@@ -1,0 +1,37 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pipeline-smoketest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: install
+        run: |
+          pip install -e .[dev]
+      - name: precompute (synthetic, fallback encoder)
+        run: python -m precompute.run --source synthetic --n 120 --encoder fallback --target-size 40
+      - name: assert artifacts
+        run: |
+          test -f web/public/data/summary.json
+          test -f web/public/data/clusters.json
+          test -f web/public/data/duplicates.json
+          test -f web/public/data/lineage.json
+
+  web-build:
+    runs-on: ubuntu-latest
+    needs: pipeline-smoketest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: install & build
+        working-directory: web
+        run: |
+          npm install
+          npm run build

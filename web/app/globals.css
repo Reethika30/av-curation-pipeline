@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body { background: #0b0f17; color: #e2e8f0; }
+body { font-feature-settings: "ss01", "cv11"; }
+
+::selection { background: #38bdf8; color: #0b0f17; }

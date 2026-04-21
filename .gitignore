@@ -1,0 +1,43 @@
+# Datasets and large artifacts
+data/
+*.parquet
+*.lance/
+*.npz
+
+# DVC
+.dvc/cache
+.dvc/tmp
+.dvc/plots
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / Next
+web/node_modules/
+web/.next/
+web/out/
+web/.vercel/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Models cache
+.cache/
+hf_cache/

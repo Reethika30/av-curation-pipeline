@@ -1,0 +1,22 @@
+# DVC stage definitions. Run: `dvc repro` after `dvc init`.
+stages:
+  ingest_and_curate:
+    cmd: python -m precompute.run --source synthetic --n 400 --target-size 120 --dup-threshold 0.985
+    deps:
+      - precompute/run.py
+      - pipeline/loaders.py
+      - pipeline/embeddings.py
+      - pipeline/vector_store.py
+      - pipeline/curation.py
+      - pipeline/lineage.py
+    outs:
+      - web/public/data/samples.json
+      - web/public/data/duplicates.json
+      - web/public/data/outliers.json
+      - web/public/data/clusters.json
+      - web/public/data/curation_set.json
+      - web/public/data/clip_embeddings.npz
+      - web/public/data/summary.json
+      - web/public/data/lineage.json
+      - web/public/thumbs
+      - data/tables/samples.parquet
