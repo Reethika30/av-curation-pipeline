@@ -11,15 +11,13 @@ End-to-end pipeline that ingests synchronized multi-sensor AV data (LiDAR + RGB 
 > with `facebook/dinov2-small` + `openai/clip-vit-base-patch32`. FAISS
 > `IndexIVFFlat` benchmark vs brute-force NumPy on synthetic 512-d vectors:
 > **4.5–5.7× faster at recall@10 = 1.000** across N ∈ {1k, 5k, 10k}. A
-> reproducible synthetic mode (`--source synthetic --n 400`) ships for CI
-> and Vercel demos.
+> reproducible synthetic mode (`--source synthetic --n 400`) 
 >
 > Reproduce: `python -m precompute.run --source nuscenes --dataroot ./data/nuscenes/v1.0-mini --encoder torch --vector-backend faiss --benchmark`
 
 ## Live demo
 
 - **Frontend (Vercel):** https://av-curation-pipeline.vercel.app
-- **Source:** https://github.com/Reethika30/av-curation-pipeline
 - **Embedding viewer:** UMAP scatter, near-duplicate gallery, outlier explorer, DVC lineage timeline
 
 ## Architecture
