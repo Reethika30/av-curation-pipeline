@@ -112,7 +112,7 @@ python -m precompute.run --source synthetic --n 400`}
       </section>
 
       <footer className="border-t border-line pt-6 text-xs text-slate-600">
-        Built with PyArrow · DuckDB · DINOv2 · CLIP · LanceDB · UMAP · HDBSCAN
+        Built with PyArrow · DuckDB · DINOv2 · CLIP · UMAP · HDBSCAN
         · FastAPI · Next.js · DVC. Source code on GitHub.
       </footer>
     </main>

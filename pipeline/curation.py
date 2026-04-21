@@ -27,7 +27,7 @@ def find_near_duplicates(
     threshold: float = 0.97,
 ) -> list[DuplicateGroup]:
     """Greedy union-find on cosine similarity. O(N^2) — fine for ≤ 50K
-    samples; production code would shard via LanceDB ANN + verify."""
+    samples; production code would shard via an ANN index + verify."""
     if len(embeddings) == 0:
         return []
     norms = embeddings / (np.linalg.norm(embeddings, axis=1, keepdims=True) + 1e-8)

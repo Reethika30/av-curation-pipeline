@@ -1,7 +1,6 @@
 # Datasets and large artifacts
 data/
 *.parquet
-*.lance/
 *.npz
 
 # DVC

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "av-curation-pipeline"
 version = "0.1.0"
-description = "Multimodal curation pipeline for autonomous-driving datasets (DINOv2 + CLIP + LanceDB + DVC)."
+description = "Multimodal curation pipeline for autonomous-driving datasets (DINOv2 + CLIP + DVC)."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -31,7 +31,6 @@ ml = [
     "transformers>=4.40",
     "open-clip-torch>=2.24",
 ]
-vector = ["lancedb>=0.6"]
 nuscenes = ["nuscenes-devkit>=1.1.11"]
 dvc = ["dvc>=3.48"]
 dev = [

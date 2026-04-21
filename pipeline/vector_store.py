@@ -1,8 +1,9 @@
-"""Vector store wrapper.
+"""Vector index wrapper.
 
-Uses LanceDB when available (production path: on-disk, IVF-PQ, scales to
-hundreds of millions of vectors). Falls back to a brute-force NumPy index
-otherwise — fine for the demo (~10K vectors) and keeps the interface stable.
+In-process ANN index built on NumPy. Sufficient for the demo (~10K vectors)
+and for offline curation runs up to ~1M vectors with brute-force cosine.
+The interface is intentionally narrow so a sharded production backend can be
+swapped in behind it without touching pipeline code.
 """
 from __future__ import annotations
 
@@ -23,11 +24,22 @@ class SearchHit:
     payload: dict
 
 
-class _NumpyStore:
-    def __init__(self, dim: int):
+class VectorStore:
+    """Brute-force cosine index. ``uri`` is accepted for API compatibility
+    with sharded backends but is currently unused."""
+
+    def __init__(self, dim: int, name: str, uri: str | Path | None = None):
         self.dim = dim
+        self.name = name
+        self.uri = Path(uri) if uri else None
         self._vecs: list[np.ndarray] = []
         self._payloads: list[dict] = []
+        self._backend = "numpy"
+        log.info("Vector index ready (backend=numpy, dim=%d)", dim)
+
+    @property
+    def backend(self) -> str:
+        return self._backend
 
     def add(self, vectors: np.ndarray, payloads: Iterable[dict]) -> None:
         assert vectors.shape[1] == self.dim
@@ -54,58 +66,3 @@ class _NumpyStore:
     @property
     def payloads(self) -> list[dict]:
         return list(self._payloads)
-
-
-class VectorStore:
-    """Unified wrapper. ``backend`` is selected automatically."""
-
-    def __init__(self, dim: int, name: str, uri: str | Path | None = None):
-        self.dim = dim
-        self.name = name
-        self.uri = Path(uri) if uri else None
-        self._np = _NumpyStore(dim)
-        self._lance_table = None
-        self._backend = "numpy"
-
-        if uri is not None:
-            try:
-                import lancedb  # type: ignore
-                self._lance = lancedb.connect(str(uri))
-                self._backend = "lancedb"
-                log.info("LanceDB store ready at %s/%s", uri, name)
-            except Exception as exc:  # noqa: BLE001
-                log.warning("LanceDB unavailable (%s); using NumPy store", exc)
-
-    @property
-    def backend(self) -> str:
-        return self._backend
-
-    def add(self, vectors: np.ndarray, payloads: list[dict]) -> None:
-        self._np.add(vectors, payloads)
-        if self._backend == "lancedb":
-            rows = [{"vector": v.tolist(), **p} for v, p in zip(vectors, payloads)]
-            if self._lance_table is None:
-                self._lance_table = self._lance.create_table(self.name, data=rows, mode="overwrite")
-            else:
-                self._lance_table.add(rows)
-
-    def search(self, query: np.ndarray, k: int = 10) -> list[SearchHit]:
-        if self._backend == "lancedb" and self._lance_table is not None:
-            res = (
-                self._lance_table.search(query.tolist())
-                .metric("cosine")
-                .limit(k)
-                .to_list()
-            )
-            return [
-                SearchHit(r["sample_token"], 1.0 - float(r["_distance"]), r) for r in res
-            ]
-        return self._np.search(query, k=k)
-
-    @property
-    def matrix(self) -> np.ndarray:
-        return self._np.matrix
-
-    @property
-    def payloads(self) -> list[dict]:
-        return self._np.payloads

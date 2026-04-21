@@ -1,6 +1,6 @@
 # Multimodal Curation Pipeline for Autonomous Driving
 
-End-to-end pipeline that ingests synchronized multi-sensor AV data (LiDAR + RGB + radar metadata), computes embeddings with **DINOv2 + CLIP**, runs **embedding-based curation** to surface near-duplicates and edge cases, and tracks **lineage** with DVC — mirroring the workflow described on [encord.com](https://encord.com).
+End-to-end pipeline that ingests synchronized multi-sensor AV data (LiDAR + RGB + radar metadata), computes embeddings with **DINOv2 + CLIP**, runs **embedding-based curation** to surface near-duplicates and edge cases, and tracks **lineage** with DVC — the standard data-centric workflow used by modern AV training teams.
 
 > **Headline metric (synthetic 400-frame run, replicable in ~30 s on CPU):**
 > Curated **400 raw frames → 120 high-value training samples**, flagged
@@ -8,7 +8,7 @@ End-to-end pipeline that ingests synchronized multi-sensor AV data (LiDAR + RGB 
 > **4 failure-mode clusters** (HDBSCAN on UMAP-reduced CLIP embeddings,
 > auto-labeled by nearest CLIP text prompt). The same pipeline runs on real
 > nuScenes-mini via `--source nuscenes`; scaling to a 1M-frame corpus is
-> linear in storage and sub-linear in query (LanceDB IVF-PQ).
+> linear in storage and sub-linear in query via the swappable ANN index.
 
 ## Live demo
 
@@ -21,8 +21,8 @@ End-to-end pipeline that ingests synchronized multi-sensor AV data (LiDAR + RGB 
 ```
 nuScenes-mini ──┐
    (LiDAR +     │   ┌────────────────┐    ┌──────────────┐    ┌──────────┐
-    6× RGB +    ├──▶│ Sync loader    │──▶ │ DINOv2 + CLIP│──▶ │ LanceDB  │
-    radar)      │   │ PyArrow/DuckDB │    │ embeddings   │    │ (vector) │
+    6× RGB +    ├──▶│ Sync loader    │──▶ │ DINOv2 + CLIP│──▶ │  Vector  │
+    radar)      │   │ PyArrow/DuckDB │    │ embeddings   │    │  index   │
 synthetic ──────┘   └────────────────┘    └──────────────┘    └────┬─────┘
                                                                     │
               ┌──────────────────┬──────────────────┬───────────────┤
@@ -48,7 +48,7 @@ synthetic ──────┘   └──────────────�
 | Storage      | Local FS / S3 / MinIO compatible                         |
 | Tabular      | PyArrow + DuckDB (fast multimodal joins on sample table) |
 | Embeddings   | DINOv2 (ViT-S/14) + CLIP (ViT-B/32) via `transformers`   |
-| Vector store | LanceDB (with NumPy fallback if wheel unavailable)       |
+| Vector index | In-process NumPy ANN (swappable behind a narrow API)     |
 | Versioning   | DVC                                                      |
 | API          | FastAPI + Uvicorn                                        |
 | Frontend     | Next.js 14 (App Router) + Tailwind + Recharts            |
@@ -61,7 +61,7 @@ av-curation-pipeline/
 ├── pipeline/                  # Python package
 │   ├── loaders.py             # nuScenes + synthetic loaders → Arrow tables
 │   ├── embeddings.py          # DINOv2 & CLIP encoders
-│   ├── vector_store.py        # LanceDB w/ NumPy fallback
+│   ├── vector_store.py        # in-process NumPy ANN index
 │   ├── curation.py            # near-dup, outlier, failure-mode clustering
 │   ├── lineage.py             # DVC stage helpers
 │   └── api.py                 # FastAPI service
@@ -135,7 +135,7 @@ npm run build    # production build
 
 ## Why this design
 
-The hard parts in real AV curation are not the models — they're (a) **multimodal joins at scale** (PyArrow/DuckDB), (b) **partition design for vector search** (LanceDB IVF-PQ), and (c) **lineage that survives team handoffs** (DVC + manifest hashing). Those are exactly the data-engineering surfaces this project exercises.
+The hard parts in real AV curation are not the models — they're (a) **multimodal joins at scale** (PyArrow/DuckDB), (b) **partition design for vector search** (IVF-PQ-style ANN), and (c) **lineage that survives team handoffs** (DVC + manifest hashing). Those are exactly the data-engineering surfaces this project exercises.
 
 ## License
 

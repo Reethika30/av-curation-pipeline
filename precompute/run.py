@@ -91,11 +91,10 @@ def main() -> None:
                         clip=encoded.clip_image,
                         dino=encoded.dinov2)
 
-    # ----- 3. Vector store (LanceDB if available) -----
+    # ----- 3. Vector index -----
     store = vector_store.VectorStore(
         dim=encoded.clip_image.shape[1],
         name="clip_image",
-        uri=REPO_ROOT / "data" / "lance",
     )
     payloads = [
         {"sample_token": s.sample_token, "scene_name": s.scene_name,
