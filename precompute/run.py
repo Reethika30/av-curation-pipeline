@@ -53,6 +53,12 @@ def main() -> None:
     p.add_argument("--n", type=int, default=400, help="synthetic samples to generate")
     p.add_argument("--dataroot", type=str, default="./data/nuscenes")
     p.add_argument("--encoder", choices=["auto", "torch", "fallback"], default="auto")
+    p.add_argument("--vector-backend", choices=["auto", "numpy", "faiss"], default="auto",
+                   help="vector index backend; 'auto' picks faiss if installed and n>=2000")
+    p.add_argument("--benchmark", action="store_true",
+                   help="run brute-force vs FAISS recall/latency benchmark and bake to web")
+    p.add_argument("--benchmark-sizes", type=str, default="1000,5000,10000",
+                   help="comma-separated corpus sizes for the benchmark")
     p.add_argument("--dup-threshold", type=float, default=0.97)
     p.add_argument("--target-size", type=int, default=120)
     p.add_argument("--max-samples", type=int, default=None,
@@ -92,9 +98,11 @@ def main() -> None:
                         dino=encoded.dinov2)
 
     # ----- 3. Vector index -----
-    store = vector_store.VectorStore(
+    store = vector_store.make_store(
         dim=encoded.clip_image.shape[1],
         name="clip_image",
+        backend=args.vector_backend,
+        n_hint=len(samples),
     )
     payloads = [
         {"sample_token": s.sample_token, "scene_name": s.scene_name,
@@ -102,7 +110,8 @@ def main() -> None:
         for s in samples
     ]
     store.add(encoded.clip_image, payloads)
-    log.info("Vector store backend: %s", store.backend)
+    index_info = store.finalize() if hasattr(store, "finalize") else {"index_type": store.backend}
+    log.info("Vector store backend: %s (%s)", store.backend, index_info.get("index_type"))
 
     # ----- 4. Curation -----
     tokens = [s.sample_token for s in samples]
@@ -154,6 +163,7 @@ def main() -> None:
         "source": args.source,
         "encoder_backend": encoded.backend,
         "vector_backend": store.backend,
+        "vector_index": index_info,
         "n_input_samples": len(samples),
         "n_scenes": len({s.scene_name for s in samples}),
         "n_duplicate_groups": len(dup_groups),
@@ -179,6 +189,26 @@ def main() -> None:
             "per_cluster_kept": curated.per_cluster_kept,
         }), encoding="utf-8",
     )
+
+    # ----- 5b. ANN benchmark (optional) -----
+    if args.benchmark:
+        from pipeline import ann_benchmark
+
+        sizes = tuple(int(s) for s in args.benchmark_sizes.split(",") if s.strip())
+        log.info("Running ANN benchmark at sizes %s ...", sizes)
+        bench = ann_benchmark.run_benchmark(
+            sizes=sizes,
+            dim=int(encoded.clip_image.shape[1]),
+            n_queries=200,
+            k=10,
+        )
+        (WEB_DATA / "ann_benchmark.json").write_text(
+            json.dumps(bench, indent=2), encoding="utf-8"
+        )
+        if bench:
+            summary["ann_benchmark"] = bench
+            (WEB_DATA / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+            log.info("ANN benchmark: %d points written to ann_benchmark.json", len(bench))
 
     # ----- 6. Lineage -----
     record = lineage.make_record(
