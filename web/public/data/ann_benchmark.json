@@ -1,0 +1,47 @@
+[
+  {
+    "n": 1000,
+    "dim": 512,
+    "k": 10,
+    "n_queries": 200,
+    "brute_ms_per_query": 0.053,
+    "faiss_ms_per_query": 0.012,
+    "speedup": 4.49,
+    "recall_at_k": 1.0,
+    "faiss_index": "IndexIVFFlat",
+    "faiss_params": {
+      "nlist": 31,
+      "nprobe": 16
+    }
+  },
+  {
+    "n": 5000,
+    "dim": 512,
+    "k": 10,
+    "n_queries": 200,
+    "brute_ms_per_query": 0.162,
+    "faiss_ms_per_query": 0.034,
+    "speedup": 4.73,
+    "recall_at_k": 1.0,
+    "faiss_index": "IndexIVFFlat",
+    "faiss_params": {
+      "nlist": 70,
+      "nprobe": 16
+    }
+  },
+  {
+    "n": 10000,
+    "dim": 512,
+    "k": 10,
+    "n_queries": 200,
+    "brute_ms_per_query": 0.319,
+    "faiss_ms_per_query": 0.056,
+    "speedup": 5.65,
+    "recall_at_k": 1.0,
+    "faiss_index": "IndexIVFFlat",
+    "faiss_params": {
+      "nlist": 100,
+      "nprobe": 16
+    }
+  }
+]

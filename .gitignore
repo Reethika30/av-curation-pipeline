@@ -1,7 +1,8 @@
-# Datasets and large artifacts
-data/
+# Datasets and large artifacts (only the top-level /data, not web/public/data)
+/data/
 *.parquet
 *.npz
+nuscenes_run.log
 
 # DVC
 .dvc/cache

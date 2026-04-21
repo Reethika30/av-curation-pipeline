@@ -1,0 +1,59 @@
+[
+  {
+    "run_id": "run-20260421T182650Z-c3d0b36e",
+    "timestamp_utc": "20260421T182650Z",
+    "git_sha": "08e4583159b78bb212ad5c74d80d33640f276ccf",
+    "python_version": "3.13.5",
+    "encoder_backend": "torch",
+    "source": "synthetic",
+    "n_input_samples": 400,
+    "n_curated_samples": 120,
+    "n_duplicate_groups": 51,
+    "n_outliers": 20,
+    "n_clusters": 4,
+    "duplicate_threshold": 0.985,
+    "target_size": 120,
+    "manifest_sha256": "c3d0b36ed568c722e3716760633236f94d721765031b05c2df05b011d80bfa67",
+    "extras": {
+      "vector_backend": "numpy"
+    }
+  },
+  {
+    "run_id": "run-20260421T194100Z-37cfa69e",
+    "timestamp_utc": "20260421T194100Z",
+    "git_sha": "01617249ce521060c620771afa42e9c80c67a765",
+    "python_version": "3.13.5",
+    "encoder_backend": "torch",
+    "source": "synthetic",
+    "n_input_samples": 5000,
+    "n_curated_samples": 120,
+    "n_duplicate_groups": 472,
+    "n_outliers": 250,
+    "n_clusters": 11,
+    "duplicate_threshold": 0.97,
+    "target_size": 120,
+    "manifest_sha256": "37cfa69e1194c83aad2664d58c206edd66ce6b687076c6ae3b317a3dadcef8c9",
+    "extras": {
+      "vector_backend": "faiss"
+    }
+  },
+  {
+    "run_id": "run-20260421T215201Z-f02009ee",
+    "timestamp_utc": "20260421T215201Z",
+    "git_sha": "01617249ce521060c620771afa42e9c80c67a765",
+    "python_version": "3.13.5",
+    "encoder_backend": "torch",
+    "source": "nuscenes",
+    "n_input_samples": 404,
+    "n_curated_samples": 120,
+    "n_duplicate_groups": 11,
+    "n_outliers": 20,
+    "n_clusters": 18,
+    "duplicate_threshold": 0.97,
+    "target_size": 120,
+    "manifest_sha256": "f02009ee3ebbe7c0a46d48e06635e7e39e249e166cbe127ed3c4077f2dcf3e91",
+    "extras": {
+      "vector_backend": "faiss"
+    }
+  }
+]

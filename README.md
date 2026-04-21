@@ -2,13 +2,19 @@
 
 End-to-end pipeline that ingests synchronized multi-sensor AV data (LiDAR + RGB + radar metadata), computes embeddings with **DINOv2 + CLIP**, runs **embedding-based curation** to surface near-duplicates and edge cases, and tracks **lineage** with DVC — the standard data-centric workflow used by modern AV training teams.
 
-> **Headline metric (synthetic 400-frame run, replicable in ~30 s on CPU):**
-> Curated **400 raw frames → 120 high-value training samples**, flagged
-> **28.5% near-duplicates** (cosine ≥ 0.985 in DINOv2 space), surfaced
-> **4 failure-mode clusters** (HDBSCAN on UMAP-reduced CLIP embeddings,
-> auto-labeled by nearest CLIP text prompt). The same pipeline runs on real
-> nuScenes-mini via `--source nuscenes`; scaling to a 1M-frame corpus is
-> linear in storage and sub-linear in query via the swappable ANN index.
+> **Headline metric (real nuScenes v1.0-mini, 10 scenes, CPU run):**
+> Curated **404 raw frames → 120 high-value training samples**, flagged
+> **13.6% near-duplicates** (cosine ≥ 0.97 in DINOv2 space, 11 duplicate
+> groups covering 55 samples), surfaced **18 failure-mode clusters** (HDBSCAN
+> on UMAP-reduced CLIP embeddings, auto-labeled by nearest CLIP text prompt),
+> and **20 outliers** flagged for review. End-to-end runtime ~2 min on CPU
+> with `facebook/dinov2-small` + `openai/clip-vit-base-patch32`. FAISS
+> `IndexIVFFlat` benchmark vs brute-force NumPy on synthetic 512-d vectors:
+> **4.5–5.7× faster at recall@10 = 1.000** across N ∈ {1k, 5k, 10k}. A
+> reproducible synthetic mode (`--source synthetic --n 400`) ships for CI
+> and Vercel demos.
+>
+> Reproduce: `python -m precompute.run --source nuscenes --dataroot ./data/nuscenes/v1.0-mini --encoder torch --vector-backend faiss --benchmark`
 
 ## Live demo
 
@@ -87,14 +93,16 @@ av-curation-pipeline/
 cd av-curation-pipeline
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -e .[dev]
+pip install -e .[dev,ml,ann,nuscenes]
 
-# Option A: synthetic demo (no download, ~10s on CPU)
+# Option A: synthetic demo (no download, ~30 s on CPU)
 python -m precompute.run --source synthetic --n 400
 
-# Option B: real nuScenes-mini (~4 GB download)
-python scripts/download_nuscenes_mini.py
-python -m precompute.run --source nuscenes --dataroot ./data/nuscenes
+# Option B: real nuScenes-mini (~4 GB download, ~2 min CPU run)
+python scripts/download_nuscenes_mini.py     # prints sign-up + extract steps
+python -m precompute.run --source nuscenes \
+    --dataroot ./data/nuscenes/v1.0-mini \
+    --encoder torch --vector-backend faiss --benchmark
 ```
 
 ### 2. API
